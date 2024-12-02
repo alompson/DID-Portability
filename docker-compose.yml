@@ -1,0 +1,61 @@
+services:
+  agent1:
+    image: bcgovimages/aries-cloudagent:py3.12_1.0.1
+    platform: linux/amd64
+    environment:
+      ACAPY_GENESIS_URL: "http://test.bcovrin.vonx.io/genesis"  # Example genesis URL, replace with Cheqd or your ledger
+      ACAPY_WALLET_NAME: "wallet1"
+      ACAPY_WALLET_KEY: "secret1"
+      ACAPY_AUTO_PROVISION: "true"
+      ACAPY_WALLET_TYPE: "indy"
+      ACAPY_SEED: "000000000000000000000000000Agent1"  # deterministic DID
+      ACAPY_ENDPOINT: "http://localhost:8020"
+      ACAPY_ADMIN_ENDPOINT: "http://localhost:8031"
+      ACAPY_LEDGER: "sovrin"  # Change this to Cheqd or other supported ledger
+    ports:
+      - "8020:8020"
+      - "8031:8031"
+    #command: ["aca-py", "start", "--inbound-transport", "http", "0.0.0.0", "8020", "--outbound-transport", "http", "--admin", "0.0.0.0", "8031", "--admin-insecure-mode", "--auto-provision", "--debug", "--log-level", "DEBUG"]
+    #command: ["aca-py", "start", "--inbound-transport", "http", "0.0.0.0", "8020", "--outbound-transport", "http", "--admin", "0.0.0.0", "8031", "--admin-insecure-mode", "--auto-provision", "--log-level", "debug", "--debugpy", "--debugpy-port", "5678"]
+    command: >
+      sh -c "python -m debugpy --listen 0.0.0.0:5678 --wait-for-client &
+      aca-py start --inbound-transport http 0.0.0.0 8020 --outbound-transport http --admin 0.0.0.0 8031 --admin-insecure-mode --auto-provision"
+  agent2:
+    image: bcgovimages/aries-cloudagent:py3.12_1.0.1
+    platform: linux/amd64
+    environment:
+      ACAPY_GENESIS_URL: "http://test.bcovrin.vonx.io/genesis"  # Example genesis URL, replace with Cheqd or your ledger
+      ACAPY_WALLET_NAME: "wallet2"
+      ACAPY_WALLET_KEY: "secret2"
+      ACAPY_AUTO_PROVISION: "true"
+      ACAPY_WALLET_TYPE: "indy"
+      ACAPY_SEED: "000000000000000000000000000Agent2"
+      ACAPY_ENDPOINT: "http://localhost:8040"
+      ACAPY_ADMIN_ENDPOINT: "http://localhost:8051"
+      ACAPY_LEDGER: "sovrin"  # Change this to Cheqd or other supported ledger
+    ports:
+      - "8040:8040"
+      - "8051:8051"
+    #command: ["aca-py", "start", "--inbound-transport", "http", "0.0.0.0", "8040", "--outbound-transport", "http", "--admin", "0.0.0.0", "8051", "--admin-insecure-mode", "--auto-provision", "--debug", "--log-level", "DEBUG"]
+    command: ["aca-py", "start", "--inbound-transport", "http", "0.0.0.0", "8040", "--outbound-transport", "http", "--admin", "0.0.0.0", "8051", "--admin-insecure-mode", "--auto-provision", "--log-level", "debug", "--debugpy", "--debugpy-port", "5678"]
+
+
+  # universal-resolver:
+  #   image: decentralizedidentity/universal-resolver:latest
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     UNIREGISTRAR_DRIVER_DOCKER_REGISTRY: "docker.io"
+  #   depends_on:
+  #     - driver-did-ethr
+  #     - driver-did-sov
+
+  # driver-did-ethr:
+  #   image: uport/uni-resolver-driver-did-uport:latest
+  #   environment:
+  #     NETWORK: "rinkeby"  # Use a testnet like Rinkeby or Mainnet if desired
+
+  # driver-did-sov:
+  #   image: decentralizedidentity/driver-did-sov:latest
+  #   environment:
+  #     LEDGER_URL: "http://test.bcovrin.vonx.io/genesis"
